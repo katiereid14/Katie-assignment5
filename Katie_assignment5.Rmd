@@ -1,0 +1,41 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+# Install Packages
+```{r}
+#install.packages("tidyverse", dependencies = TRUE)
+#install.packages("ggthemes", dependencies = TRUE)
+```
+# Load Packages
+```{r}
+library(tidyverse)
+library(ggthemes)
+library(rstatix)
+library(ggpubr)
+```
+# Import Data
+```{r}
+assignment5 = read_csv("assignment5_data.csv")
+```
+
+# Subject Level Means
+```{r}
+subject_accuracy = assignment5 %>%
+  select(subject, prime_condition, accuracy)
+
+subject_rt = assignment5 %>%
+  select(subject, prime_condition, response_RT)
+```
+
+# Format of the Data
+Both subject_accuracy and subject_rt are in long format because they both have multiple rows for each observation (each subject has multiple rows for the different conditions).
+
+# Long to Wide Format
+```{r}
+subject_accuracy_wide = subject_accuracy %>%
+  pivot_wider(names_from = prime_condition, values_from = accuracy)
+```
+
+
+

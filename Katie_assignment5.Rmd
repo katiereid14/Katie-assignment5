@@ -22,10 +22,12 @@ assignment5 = read_csv("assignment5_data.csv")
 # Subject Level Means
 ```{r}
 subject_accuracy = assignment5 %>%
-  select(subject, prime_condition, accuracy)
+  group_by(subject, prime_condition) %>%
+  summarise(mean_accuracy = mean(accuracy))
 
 subject_rt = assignment5 %>%
-  select(subject, prime_condition, response_RT)
+  group_by(subject, prime_condition) %>%
+  summarise(mean_RT = mean(response_RT))
 ```
 
 # Format of the Data
@@ -34,8 +36,65 @@ Both subject_accuracy and subject_rt are in long format because they both have m
 # Long to Wide Format
 ```{r}
 subject_accuracy_wide = subject_accuracy %>%
-  pivot_wider(names_from = prime_condition, values_from = accuracy)
+  pivot_wider(names_from = prime_condition, values_from = mean_accuracy)
 ```
+
+# Wide to Long Format
+```{r}
+subject_accuracy_long = subject_accuracy_wide %>%
+  pivot_longer(names_to = "prime condition", cols = both:unrelated)
+```
+
+# Interpretation 
+The other data frame that includes this data is subject_accuracy because that was already in long format.
+
+# T-Test in R
+```{r}
+t.test(subject_accuracy_wide$phonological, subject_accuracy_wide$semantic, var.equal = FALSE, paired = TRUE)
+```
+
+# T-Test interpretation
+Because the t-test is 2-tailed, we compare our p value to 0.025 because that is half of alpha. Our p value of 9.33e-05 is much smaller than 0.025, which means there is a significant difference between the mean accuracy of the phonological and semantic conditions.
+
+# T-Test Manual
+```{r}
+x1_bar = mean(subject_accuracy_wide$phonological)
+x2_bar = mean(subject_accuracy_wide$semantic)
+x_bar_diff = x1_bar - x2_bar
+
+s1 = sd(subject_accuracy_wide$phonological)
+s2 = sd(subject_accuracy_wide$semantic)
+s_bar_diff = s1 - s2
+
+n = nrow(subject_accuracy_wide)
+sqrt_n = sqrt(n)
+
+t = x_bar_diff / (s_bar_diff/sqrt_n)
+```
+
+
+# T-Test Outliers
+```{r}
+subject_accuracy_wide = subject_accuracy_wide %>%
+  mutate(mean_difference = phonological - semantic)
+
+subject_accuracy_wide = subject_accuracy_wide %>% ungroup()
+
+hist(subject_accuracy_wide$mean_difference)
+ggqqplot(subject_accuracy_wide, "mean_difference")
+
+outliers = subject_accuracy_wide %>%
+  identify_outliers(mean_difference)
+```
+There was one outlier, but it was not extreme so it does not need to be removed from data.
+
+# T Test Normality
+```{r}
+
+```
+
+
+
 
 
 
